@@ -11,11 +11,11 @@ template = env.from_string("""
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Interactive Simulations</title>
+  <title>{{ title }}</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Physics Simulations</h1>
+  <h1>{{ title }}</h1>
   <div class="gallery">
     {% for p in projects %}
     <a class="card" href="{{ p.path }}">
