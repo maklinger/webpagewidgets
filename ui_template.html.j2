@@ -34,6 +34,90 @@
         background-color: #ddd;
     }
 
+    .loading-spinner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255,255,255,0.8);
+        z-index: 10;
+    }
+
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #24d70074;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .plot-container {
+        position: relative;
+        width: fit-content;
+    }
+
+
+    /* === Global Slider Styling === */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      background: #ffffffa9;        /* white track, no blue fill */
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+      background: #ffffffa9;
+      border-radius: 4px;
+    }
+
+    input[type="range"]::-moz-range-track {
+      background: #ffffffa9;
+      border-radius: 4px;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #1b690cf1;       /* teal color for all sliders */
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+      margin-top: -7px;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #1b690cf1;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+    }
+
+    input[type="range"]:hover::-webkit-slider-thumb {
+      background: #1b690cf1;
+    }
+
+    input[type="range"]:hover::-moz-range-thumb {
+      background: #1b690cf1;
+    }
+
 
     canvas {
       border: 1px solid #ddd;
@@ -53,6 +137,18 @@
 
   <script type="module">
 
+  function showSpinner(id) {
+    const spinner = document.getElementById(id + "_spinner");
+    if (spinner) spinner.style.display = "flex";
+  }
+
+  function hideSpinner(id) {
+    const spinner = document.getElementById(id + "_spinner");
+    if (spinner) spinner.style.display = "none";
+  }
+  {% for pid, stuff in plots.items() %}
+  showSpinner("{{ pid }}");
+  {% endfor %}
 
   import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.mjs";
   const pyodide = await loadPyodide();
@@ -92,6 +188,9 @@
   pyodide.runPython(src_{{ loop.index }});
   {% endfor %}
 
+  {% for pid, stuff in plots.items() %}
+  hideSpinner("{{ pid }}");
+  {% endfor %}
 
   // define the function - argument mapping
   console.log("Define functions");
@@ -145,6 +244,7 @@
   {% endfor %}
 
   
+
   </script>
 
 </body>
