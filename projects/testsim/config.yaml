@@ -1,0 +1,50 @@
+project_name: Projectile Motion
+
+backend_files:
+  - ../simulation.py  # relative to output/ folder
+
+python_packages:
+  - numpy
+  - micropip
+
+functions:
+  run_simulation:
+    args: [angle, speed]
+    trigger:
+      - control: "angle"
+        event: "input"
+      - control: "speed"
+        event: "input"
+    updates: [traj_plot]
+
+
+elements:
+  - id: angle
+    type: slider
+    label: Launch Angle
+    min: 10
+    max: 80
+    step: 1
+    value: 45
+  - id: speed
+    type: slider
+    label: Velocity
+    min: 5
+    max: 50
+    step: 1
+    value: 20
+  - id: traj_plot
+    type: plot
+    plotter: ../TrajPlotter.js
+    title: Trajectory
+    x_label: "x (m)"
+    y_label: "y (m)"
+    width: 600
+    height: 400
+  
+
+layout:
+  HorizontalBox:
+    - traj_plot
+    - VerticalBox: [angle, speed]
+

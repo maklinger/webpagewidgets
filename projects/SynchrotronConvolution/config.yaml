@@ -1,0 +1,152 @@
+project_name: Synchrotron Convolution
+
+backend_files:
+  - ../synchrotronCalc.py  # relative to output/ folder
+  - ../physicsConsts.py  # relative to output/ folder
+
+python_packages:
+  - numpy
+  - scipy
+  - micropip
+
+functions:
+  calcSyn:
+    args: [lgEmin, lgEb, lgEmax, p, dp, lgs, lgchi, lgB, lgEelDelta, NvisEl, lgintRes]
+    trigger:
+      - control: "lgEmin"
+        event: "input"
+      - control: "lgEb"
+        event: "input"
+      - control: "lgEmax"
+        event: "input"
+      - control: "p"
+        event: "input"
+      - control: "dp"
+        event: "input"
+      - control: "lgs"
+        event: "input"
+      - control: "lgchi"
+        event: "input"
+      - control: "lgB"
+        event: "input"
+      - control: "lgEelDelta"
+        event: "input"
+      - control: "NvisEl"
+        event: "input"
+      - control: "lgintRes"
+        event: "input"
+    updates: [plot_el, plot_ph]
+
+
+elements:
+  - id: lgEmin
+    type: slider
+    label: E_min [eV]
+    min: 7
+    max: 15
+    step: 0.1
+    value: 8
+    scale: log10
+  - id: lgEb
+    type: slider
+    label: E_b [eV]
+    min: 7
+    max: 15
+    step: 0.1
+    value: 10
+    scale: log10
+  - id: lgEmax
+    type: slider
+    label: E_max [eV]
+    min: 7
+    max: 15
+    step: 0.1
+    value: 12
+    scale: log10
+  - id: p
+    type: slider
+    label: p
+    min: 0
+    max: 5
+    step: 0.1
+    value: 2
+  - id: dp
+    type: slider
+    label: dp
+    min: -3
+    max: 5
+    step: 0.1
+    value: 1
+  - id: lgs
+    type: slider
+    label: s
+    min: -2
+    max: 2
+    step: 0.1
+    value: 0
+    scale: log10
+  - id: lgchi
+    type: slider
+    label: chi
+    min: -2
+    max: 2
+    step: 0.1
+    value: 0
+    scale: log10
+  - id: lgB
+    type: slider
+    label: B [G]
+    min: -5
+    max: 2
+    step: 0.1
+    value: 0
+    scale: log10
+  - id: lgEelDelta
+    type: slider
+    label: E_el_delta [eV]
+    min: 7
+    max: 15
+    step: 0.1
+    value: 8
+    scale: log10
+  - id: NvisEl
+    type: slider
+    label: N_vis_el
+    min: 1
+    max: 8
+    step: 1
+    value: 3
+  - id: lgintRes
+    type: slider
+    label: intRes (# integration grid points)
+    min: 0
+    max: 1.8
+    step: 0.1
+    value: 1
+    scale: log10
+  - id: plot_el
+    type: plot
+    plotter: ../ElPlotter.js
+    title: Electrons
+    x_label: "lg E (eV)"
+    y_label: "E² dN/dEdt [au]"
+    width: 400
+    height: 400
+  - id: plot_ph
+    type: plot
+    plotter: ../PhPlotter.js
+    title: Photons
+    x_label: "lg E (eV)"
+    y_label: "E² dN/dEdt [au]"
+    width: 800
+    height: 400
+  
+
+layout:
+  VerticalBox:
+    - HorizontalBox: [plot_el, plot_ph]
+    - HorizontalBox: 
+      - VerticalBox: [lgEmin, lgEb, lgEmax]
+      - VerticalBox: [p, dp, lgs, lgchi]
+      - VerticalBox: [lgB, lgEelDelta, NvisEl, lgintRes]
+

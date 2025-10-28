@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Static test case</title>
+  <style>
+    body { font-family: sans-serif; margin: 2em; }
+    .slider-container { margin-bottom: 1em; }
+    .vbox {
+      display: flex;
+      flex-direction: column;
+      gap: 1em;
+    }
+
+    .hbox {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 1em;
+    }
+
+    canvas {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+  </style>
+</head>
+<body>
+
+  <h1>Static test case</h1>
+
+  <div style="width:600px; height:400px;">
+    <canvas id="traj_plot"></canvas>
+  </div>
+  <div class="hbox"> 
+  <div class="slider-container">
+    <label for="angle">Launch Angle: <span id="angle_val">45</span></label><br>
+    <input type="range" id="angle" min="10" max="80" 
+           step="1" value="45">
+  </div>
+  <div class="slider-container">
+    <label for="speed">Velocity: <span id="speed_val">20</span></label><br>
+    <input type="range" id="speed" min="1" max="3" 
+           step="0.1" value="2" scale="log">
+  </div>
+</div>
+  <!-- <canvas id="traj_plot" width="100" height="100"></canvas> -->
+
+  <script type="module">
+
+  import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.mjs";
+  const pyodide = await loadPyodide();
+  console.log("✅ Pyodide loaded");
+  // Redirect Python print to JS console
+  pyodide.setStdout({
+    batched: (s) => console.log(s)
+  });
+  pyodide.setStderr({
+    batched: (s) => console.error(s)
+  });
+
+  // Load required Python packages from YAML
+  const pkgs = ["numpy", "micropip"];
+  for (const pkg of pkgs) {
+    console.log(`📦 Loading ${pkg} ...`);
+    try {
+      await pyodide.loadPackage(pkg);
+    } catch (err) {
+      console.warn(`⚠️ Could not load ${pkg} automatically, trying micropip`);
+      const micropip = pyodide.pyimport("micropip");
+      await micropip.install(pkg);
+    }
+  }
+  console.log("loaded packages!");
+
+  const result_src = await (await fetch("../../../backend_common/result.py")).text();
+  pyodide.runPython(result_src);
+  console.log("Imported Result");
+
+  console.log("Import plotter");
+  let PlotterModule;
+  try {
+    PlotterModule = await import("../plotter_traj.js");
+    console.log("Imported plotter successfully!");
+  } catch(err) {
+    console.error("Failed to import plotter:", err);
+  }
+
+
+    // Load Python files relative to index.html
+    console.log("Load python sim files");
+    const moduleName_1 = "test_simulation"
+    const src_1 = await (await fetch(`../${moduleName_1}.py`)).text();
+    pyodide.runPython(src_1);
+
+    // console.log("Def functions");
+    const functions = {"run_simulation": {"args": ["angle", "speed"], "trigger": [{"control": "angle", "event": "input"}, {"control": "speed", "event": "input"}]}};
+    // const meta = { xlabel: "x (m)", ylabel: "y (m)" };
+    // const chart = Plotter.init("traj_plot", meta);
+
+    const trajPlotter = new PlotterModule.TrajPlotter("traj_plot", {
+      xlabel: "x (m)",
+      ylabel: "y (m)",
+      title: "Projectile Trajectories"
+    });
+
+    async function runFunction(funcName) {
+      console.log("Running" + funcName);
+      const meta = functions[funcName];
+      const args = meta.args.map(id => {
+        const el = document.getElementById(id);
+        const val = parseFloat(el.value);
+        
+        return `${id}=${val}`;
+      });
+      const pyCall = `${funcName}(${args.join(", ")})`;
+      const jsonResult = await pyodide.runPythonAsync(pyCall);
+      const result = JSON.parse(jsonResult);
+      trajPlotter.render(result);
+      // trajPlotter.addOrUpdateLine("normal", result.x, result.y, {c: PlotterModule.getColorByIndex(0), ls : "-", marker: "v", alpha: 0.3});
+      // trajPlotter.addOrUpdateLine("small", result.x, result.y, {c: PlotterModule.getColorByIndex(1), ls : "--", marker: ".", alpha: 0.3});
+      // trajPlotter.setAspectRatio();
+    }
+    // runFunction("run_simulation");
+    // const funcName = "run_simulation";
+    // const metatmp = functions[funcName];
+    // // Build argument list as param=value pairs
+    // const args = metatmp.args.map(name => {
+    //   const el = document.getElementById(name);
+    //   const val = parseFloat(el.value);
+    //   return `${name}=${val}`;
+    // });
+
+    // // Construct full Python call
+    // const pyCall = `run_simulation(${args.join(", ")})`;
+    // console.log(pyCall)
+    // const jsonResult = await pyodide.runPythonAsync(pyCall);
+    // const result = JSON.parse(jsonResult);
+    // console.log("JSON result:", result);
+    // console.log("x:", result.x, "y:", result.y);
+    // console.log(result);
+    // console.log(!result);
+    // console.log(!result.data);
+    // Plotter.render(chart, result);
+
+    // document.getElementById('angle')
+    // .addEventListener('input', () => {
+    //   console.log("run fired");
+    //   run_simulation(
+    //     parseFloat(document.getElementById("angle").value),
+    //     parseFloat(document.getElementById("speed").value)
+    //   );});
+    document.getElementById('angle')
+    .addEventListener('input', () => runFunction('run_simulation'));
+    document.getElementById('speed')
+    .addEventListener('input', () => runFunction('run_simulation'));
+
+
+      document.getElementById('angle').addEventListener('input', e => {
+        document.getElementById('angle_val').innerText = e.target.value;
+      });
+      document.getElementById('speed').addEventListener('input', e => {
+        document.getElementById('speed_val').innerText = e.target.value;
+      });
+      runFunction('run_simulation');
+
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{ project_name }}</title>
+  <style>
+    body { font-family: sans-serif; margin: 2em; }
+    .slider-container { margin-bottom: 1em; }
+  </style>
+</head>
+<body>
+
+  <h1>{{ project_name }}</h1>
+
+  {% for plot in plots %}
+  <canvas id="{{ plot.id }}" width="600" height="400"></canvas>
+  {% endfor %}
+  
+  {% for s in sliders %}
+  <div class="slider-container">
+    <label for="{{ s.id }}">{{ s.label }}: <span id="{{ s.id }}_val">{{ s.value }}</span></label><br>
+    <input type="range" id="{{ s.id }}" min="{{ s.min }}" max="{{ s.max }}" 
+           step="{{ s.step }}" value="{{ s.value }}">
+  </div>
+  {% endfor %}
+
+
+  <script type="module">
+
+  import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.mjs";
+  const pyodide = await loadPyodide();
+  console.log("✅ Pyodide loaded");
+
+  // Load required Python packages from YAML
+  const pkgs = {{ python_packages | tojson }};
+  for (const pkg of pkgs) {
+    console.log(`📦 Loading ${pkg} ...`);
+    try {
+      await pyodide.loadPackage(pkg);
+    } catch (err) {
+      console.warn(`⚠️ Could not load ${pkg} automatically, trying micropip`);
+      const micropip = pyodide.pyimport("micropip");
+      await micropip.install(pkg);
+    }
+  }
+
+  console.log("Import plotter");
+  import * as Plotter from "{{ plots[0].plotter }}";
+
+  console.log("Imported plotter");
+
+  // document.addEventListener("DOMContentLoaded", async () => {
+    
+
+    // Load Python files relative to index.html
+    console.log("Load python files");
+    {% for f in backend_files %}
+        const src_{{ loop.index }} = await (await fetch("{{ f }}")).text();
+        pyodide.runPython(src_{{ loop.index }});
+    {% endfor %}
+
+    // Load result script
+    const result_src = await (await fetch("{{ shared_backend }}")).text();
+    pyodide.runPython(result_src);
+
+
+    console.log("Def functions");
+    const functions = {{ functions | tojson }};
+    const meta = { xlabel: "{{ plots[0].x_label }}", ylabel: "{{ plots[0].y_label }}" };
+    const chart = Plotter.init("{{ plots[0].id }}", meta);
+
+    async function runFunction(funcName) {
+        console.log("Running" + funcName);
+      const meta = functions[funcName];
+      const args = meta.args.map(id => parseFloat(document.getElementById(id).value));
+      // dynamically use the module name from YAML
+      const pyCall = `import ${moduleName}; ${moduleName}.${funcName}(*${args})`;
+      const jsonResult = await pyodide.runPythonAsync(pyCall);
+      const result = JSON.parse(jsonResult);
+      Plotter.render(chart, result);
+    }
+
+
+
+    {% for fname, fmeta in functions.items() %}
+        {% for trig in fmeta.trigger %}
+            document.getElementById('{{ trig.control }}')
+            .addEventListener('{{ trig.event }}', () => runFunction('{{ fname }}'));
+        {% endfor %}
+    {% endfor %}
+
+
+    {% for s in sliders %}
+      document.getElementById('{{ s.id }}').addEventListener('input', e => {
+        document.getElementById('{{ s.id }}_val').innerText = e.target.value;
+      });
+    {% endfor %}
+//  });
+  </script>
+
+</body>
+</html>

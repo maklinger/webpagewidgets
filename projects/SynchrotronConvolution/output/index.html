@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Synchrotron Convolution</title>
+  <style>
+    body { font-family: sans-serif; margin: 2em; }
+
+    .slider-container { margin-bottom: 1em; }
+
+    .vbox {
+      display: flex;
+      flex-direction: column;
+      gap: 1em;
+    }
+
+    .hbox {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 1em;
+    }
+
+    canvas {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Synchrotron Convolution</h1>
+
+    <div id="main_ui">
+      <div class="vbox"><div class="hbox">
+              <div class="plot-container">
+                <h3>Electrons</h3>
+                <canvas id="plot_el" width="400" height="400"></canvas>
+              </div>
+            
+              <div class="plot-container">
+                <h3>Photons</h3>
+                <canvas id="plot_ph" width="800" height="400"></canvas>
+              </div>
+            </div><div class="hbox"><div class="vbox">
+              <div class="slider-container">
+                <label for="lgEmin">E_min [eV]: 
+                  <span id="lgEmin_val">1e8</span>
+                </label><br>
+                <input type="range" id="lgEmin"
+                       min="7"
+                       max="15"
+                       step="0.1"
+                       value="8"
+                       oninput="document.getElementById('lgEmin_val').innerText = '1e' + this.value">
+              </div>
+            
+              <div class="slider-container">
+                <label for="lgEb">E_b [eV]: 
+                  <span id="lgEb_val">1e10</span>
+                </label><br>
+                <input type="range" id="lgEb"
+                       min="7"
+                       max="15"
+                       step="0.1"
+                       value="10"
+                       oninput="document.getElementById('lgEb_val').innerText = '1e' + this.value">
+              </div>
+            
+              <div class="slider-container">
+                <label for="lgEmax">E_max [eV]: 
+                  <span id="lgEmax_val">1e12</span>
+                </label><br>
+                <input type="range" id="lgEmax"
+                       min="7"
+                       max="15"
+                       step="0.1"
+                       value="12"
+                       oninput="document.getElementById('lgEmax_val').innerText = '1e' + this.value">
+              </div>
+            </div><div class="vbox">
+              <div class="slider-container">
+                <label for="p">p: 
+                  <span id="p_val">2</span>
+                </label><br>
+                <input type="range" id="p"
+                       min="0"
+                       max="5"
+                       step="0.1"
+                       value="2"
+                       oninput="document.getElementById('p_val').innerText = '' + this.value">
+              </div>
+            
+              <div class="slider-container">
+                <label for="dp">dp: 
+                  <span id="dp_val">1</span>
+                </label><br>
+                <input type="range" id="dp"
+                       min="-3"
+                       max="5"
+                       step="0.1"
+                       value="1"
+                       oninput="document.getElementById('dp_val').innerText = '' + this.value">
+              </div>
+            
+              <div class="slider-container">
+                <label for="lgs">s: 
+                  <span id="lgs_val">1e0</span>
+                </label><br>
+                <input type="range" id="lgs"
+                       min="-2"
+                       max="2"
+                       step="0.1"
+                       value="0"
+                       oninput="document.getElementById('lgs_val').innerText = '1e' + this.value">
+              </div>
+            
+              <div class="slider-container">
+                <label for="lgchi">chi: 
+                  <span id="lgchi_val">1e0</span>
+                </label><br>
+                <input type="range" id="lgchi"
+                       min="-2"
+                       max="2"
+                       step="0.1"
+                       value="0"
+                       oninput="document.getElementById('lgchi_val').innerText = '1e' + this.value">
+              </div>
+            </div><div class="vbox">
+              <div class="slider-container">
+                <label for="lgB">B [G]: 
+                  <span id="lgB_val">1e0</span>
+                </label><br>
+                <input type="range" id="lgB"
+                       min="-5"
+                       max="2"
+                       step="0.1"
+                       value="0"
+                       oninput="document.getElementById('lgB_val').innerText = '1e' + this.value">
+              </div>
+            
+              <div class="slider-container">
+                <label for="lgEelDelta">E_el_delta [eV]: 
+                  <span id="lgEelDelta_val">1e8</span>
+                </label><br>
+                <input type="range" id="lgEelDelta"
+                       min="7"
+                       max="15"
+                       step="0.1"
+                       value="8"
+                       oninput="document.getElementById('lgEelDelta_val').innerText = '1e' + this.value">
+              </div>
+            
+              <div class="slider-container">
+                <label for="NvisEl">N_vis_el: 
+                  <span id="NvisEl_val">3</span>
+                </label><br>
+                <input type="range" id="NvisEl"
+                       min="1"
+                       max="8"
+                       step="1"
+                       value="3"
+                       oninput="document.getElementById('NvisEl_val').innerText = '' + this.value">
+              </div>
+            
+              <div class="slider-container">
+                <label for="lgintRes">intRes (# integration grid points): 
+                  <span id="lgintRes_val">1e1</span>
+                </label><br>
+                <input type="range" id="lgintRes"
+                       min="0"
+                       max="1.8"
+                       step="0.1"
+                       value="1"
+                       oninput="document.getElementById('lgintRes_val').innerText = '1e' + this.value">
+              </div>
+            </div></div></div>
+    </div>
+
+  <script type="module">
+
+
+  import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.mjs";
+  const pyodide = await loadPyodide();
+  console.log("✅ Pyodide loaded");
+  // Redirect Python print to JS console
+  pyodide.setStdout({
+    batched: (s) => console.log(s)
+  });
+  pyodide.setStderr({
+    batched: (s) => console.error(s)
+  });
+
+
+  // Load required Python packages from YAML
+  const pkgs = ["numpy", "scipy", "micropip"];
+  for (const pkg of pkgs) {
+    console.log(`📦 Loading ${pkg} ...`);
+    try {
+      await pyodide.loadPackage(pkg);
+    } catch (err) {
+      console.warn(`⚠️ Could not load ${pkg} automatically, trying micropip`);
+      const micropip = pyodide.pyimport("micropip");
+      await micropip.install(pkg);
+    }
+  }
+
+  // Import the plotters
+  console.log("Import plotter");
+  const ElPlotter = await import("../ElPlotter.js");
+  const PhPlotter = await import("../PhPlotter.js");
+
+  // Load Python files relative to index.html
+  console.log("Load python files");
+  const src_1 = await (await fetch("../synchrotronCalc.py")).text();
+  pyodide.runPython(src_1);
+  const src_2 = await (await fetch("../physicsConsts.py")).text();
+  pyodide.runPython(src_2);
+
+
+  // define the function - argument mapping
+  console.log("Define functions");
+  const functions = {"calcSyn": {"args": ["lgEmin", "lgEb", "lgEmax", "p", "dp", "lgs", "lgchi", "lgB", "lgEelDelta", "NvisEl", "lgintRes"], "trigger": [{"control": "lgEmin", "event": "input"}, {"control": "lgEb", "event": "input"}, {"control": "lgEmax", "event": "input"}, {"control": "p", "event": "input"}, {"control": "dp", "event": "input"}, {"control": "lgs", "event": "input"}, {"control": "lgchi", "event": "input"}, {"control": "lgB", "event": "input"}, {"control": "lgEelDelta", "event": "input"}, {"control": "NvisEl", "event": "input"}, {"control": "lgintRes", "event": "input"}], "updates": ["plot_el", "plot_ph"]}};
+
+
+  const charts = {};
+  charts["plot_el"] = new ElPlotter.ElPlotter("plot_el", {
+    x_label: "lg E (eV)",
+    y_label: "E² dN/dEdt [au]",
+    title: "Electrons"
+  });
+  charts["plot_ph"] = new PhPlotter.PhPlotter("plot_ph", {
+    x_label: "lg E (eV)",
+    y_label: "E² dN/dEdt [au]",
+    title: "Photons"
+  });
+
+
+  async function runFunction(funcName) {
+    console.log("Running" + funcName);
+    const meta = functions[funcName];
+    const args = meta.args.map(id => {
+        const el = document.getElementById(id);
+        const val = parseFloat(el.value);
+        return `${id}=${val}`;
+    });
+    const pyCall = `${funcName}(${args.join(", ")})`;
+    const jsonResult = await pyodide.runPythonAsync(pyCall);
+    const result = JSON.parse(jsonResult);
+    
+    
+    if (meta.updates && Array.isArray(meta.updates)) {
+      for (const pid of meta.updates) {
+        const chart = charts[pid];
+        if (chart && typeof chart.render === "function") {
+            //console.log(`Updating plot: ${pid}`);
+            chart.render(result);
+        } //else {
+        //    console.warn(`No renderable chart found for '${pid}'`);
+        //}
+      }
+    }
+
+  }
+
+
+  document.getElementById('lgEmin')
+          .addEventListener('input', () => runFunction('calcSyn'));
+  document.getElementById('lgEb')
+          .addEventListener('input', () => runFunction('calcSyn'));
+  document.getElementById('lgEmax')
+          .addEventListener('input', () => runFunction('calcSyn'));
+  document.getElementById('p')
+          .addEventListener('input', () => runFunction('calcSyn'));
+  document.getElementById('dp')
+          .addEventListener('input', () => runFunction('calcSyn'));
+  document.getElementById('lgs')
+          .addEventListener('input', () => runFunction('calcSyn'));
+  document.getElementById('lgchi')
+          .addEventListener('input', () => runFunction('calcSyn'));
+  document.getElementById('lgB')
+          .addEventListener('input', () => runFunction('calcSyn'));
+  document.getElementById('lgEelDelta')
+          .addEventListener('input', () => runFunction('calcSyn'));
+  document.getElementById('NvisEl')
+          .addEventListener('input', () => runFunction('calcSyn'));
+  document.getElementById('lgintRes')
+          .addEventListener('input', () => runFunction('calcSyn'));
+  runFunction('calcSyn');
+
+  
+  </script>
+
+</body>
+</html>

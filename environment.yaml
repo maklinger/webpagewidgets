@@ -1,0 +1,25 @@
+name: webpagewidgets
+channels:
+  - conda-forge
+dependencies:
+  # --- Core Python ---
+  - python >=3.10,<3.13
+  - pip
+
+  # --- Templating & Config ---
+  - jinja2
+  - pyyaml
+
+  # --- JSON Schema validation ---
+  - jsonschema
+
+  # --- Optional: numpy if you want to test/run simulation.py locally ---
+  - numpy
+
+  # --- Development & utilities ---
+  - black             # formatting
+  - pre-commit        # linting hooks
+  - watchdog          # optional: live-reload file watcher
+  - pip:
+      # You can add Pyodide-related tools or webdeploy helpers here
+      - pyodide-build==0.23.0

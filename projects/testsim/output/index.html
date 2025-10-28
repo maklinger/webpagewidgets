@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Projectile Motion</title>
+  <style>
+    body { font-family: sans-serif; margin: 2em; }
+
+    .slider-container { margin-bottom: 1em; }
+
+    .vbox {
+      display: flex;
+      flex-direction: column;
+      gap: 1em;
+    }
+
+    .hbox {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 1em;
+    }
+
+    canvas {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Projectile Motion</h1>
+
+    <div id="main_ui">
+      <div class="hbox">
+              <div class="plot-container">
+                <h3>Trajectory</h3>
+                <canvas id="traj_plot" width="600" height="400"></canvas>
+              </div>
+            <div class="vbox">
+              <div class="slider-container">
+                <label for="angle">Launch Angle: 
+                  <span id="angle_val">45</span>
+                </label><br>
+                <input type="range" id="angle"
+                       min="10"
+                       max="80"
+                       step="1"
+                       value="45"
+                       oninput="document.getElementById('angle_val').innerText = this.value">
+              </div>
+            
+              <div class="slider-container">
+                <label for="speed">Velocity: 
+                  <span id="speed_val">20</span>
+                </label><br>
+                <input type="range" id="speed"
+                       min="5"
+                       max="50"
+                       step="1"
+                       value="20"
+                       oninput="document.getElementById('speed_val').innerText = this.value">
+              </div>
+            </div></div>
+    </div>
+
+  <script type="module">
+
+
+  import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.mjs";
+  const pyodide = await loadPyodide();
+  console.log("✅ Pyodide loaded");
+  // Redirect Python print to JS console
+  pyodide.setStdout({
+    batched: (s) => console.log(s)
+  });
+  pyodide.setStderr({
+    batched: (s) => console.error(s)
+  });
+
+
+  // Load required Python packages from YAML
+  const pkgs = ["numpy", "micropip"];
+  for (const pkg of pkgs) {
+    console.log(`📦 Loading ${pkg} ...`);
+    try {
+      await pyodide.loadPackage(pkg);
+    } catch (err) {
+      console.warn(`⚠️ Could not load ${pkg} automatically, trying micropip`);
+      const micropip = pyodide.pyimport("micropip");
+      await micropip.install(pkg);
+    }
+  }
+
+  // Import the plotters
+  console.log("Import plotter");
+  const TrajPlotter = await import("../TrajPlotter.js");
+
+  // Load Python files relative to index.html
+  console.log("Load python files");
+  const src_1 = await (await fetch("../simulation.py")).text();
+  pyodide.runPython(src_1);
+
+
+  // define the function - argument mapping
+  console.log("Define functions");
+  const functions = {"run_simulation": {"args": ["angle", "speed"], "trigger": [{"control": "angle", "event": "input"}, {"control": "speed", "event": "input"}], "updates": ["traj_plot"]}};
+
+
+  const charts = {};
+  charts["traj_plot"] = new TrajPlotter.TrajPlotter("traj_plot", {
+    x_label: "x (m)",
+    y_label: "y (m)",
+    title: "Trajectory"
+  });
+
+
+  async function runFunction(funcName) {
+    console.log("Running" + funcName);
+    const meta = functions[funcName];
+    const args = meta.args.map(id => {
+        const el = document.getElementById(id);
+        const val = parseFloat(el.value);
+        return `${id}=${val}`;
+    });
+    const pyCall = `${funcName}(${args.join(", ")})`;
+    const jsonResult = await pyodide.runPythonAsync(pyCall);
+    const result = JSON.parse(jsonResult);
+    
+    
+    if (meta.updates && Array.isArray(meta.updates)) {
+      for (const pid of meta.updates) {
+        const chart = charts[pid];
+        if (chart && typeof chart.render === "function") {
+            console.log(`Updating plot: ${pid}`);
+            chart.render(result);
+        } else {
+            console.warn(`No renderable chart found for '${pid}'`);
+        }
+      }
+    }
+
+  }
+
+
+  document.getElementById('angle')
+          .addEventListener('input', () => runFunction('run_simulation'));
+  document.getElementById('speed')
+          .addEventListener('input', () => runFunction('run_simulation'));
+
+
+  </script>
+
+</body>
+</html>
