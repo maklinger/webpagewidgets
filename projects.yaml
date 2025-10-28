@@ -4,4 +4,4 @@ projects:
   - name: "Synchrotron Convolution"
     path: "projects/SynchrotronConvolution/output/index.html"
     image: "projects/SynchrotronConvolution/preview.png"
-    description: "Visualise the coneection between electron spectra and the corresponding synchrotron spectrum."
+    description: "Visualise the relation between electron spectra and the corresponding synchrotron spectra."
