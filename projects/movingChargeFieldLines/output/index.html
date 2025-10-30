@@ -278,9 +278,18 @@
 
   const charts = {};
   charts["plot_fields"] = new FieldLinePlotter.FieldLinePlotter("plot_fields", {
-    x_label: "x [m]",
-    y_label: "y [m]",
-    title: "Electric field amplitude"
+    plotter_path : "../FieldLinePlotter.js",
+    id : "plot_fields",
+    type : "plot",
+    plotter : "../FieldLinePlotter.js",
+    library : "plotly.js",
+    title : "Electric field amplitude",
+    x_label : "x [m]",
+    y_label : "y [m]",
+    cbar_label : "Field strength [V/m]",
+    width : "600",
+    height : "500",
+    varname : "FieldLinePlotter",
   });
 
 

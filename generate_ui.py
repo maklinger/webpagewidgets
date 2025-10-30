@@ -142,12 +142,9 @@ def generate_ui(config_path):
     plotters_set = set()
     for el in cfg.get("elements", []):
         if el.get("type") == "plot" and "plotter" in el:
-            plots[el["id"]] = {
-                "plotter_path": el["plotter"],
-                "x_label": el.get("x_label", "x"),
-                "y_label": el.get("y_label", "y"),
-                "title": el.get("title", None)
-            }
+            plots[el["id"]] = {"plotter_path": el["plotter"]}
+            for key, field in el.items():
+                plots[el["id"]][key] = field
             plotters_set.add(el["plotter"])
 
     # Generate unique JS variable names for plotters

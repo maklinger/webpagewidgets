@@ -145,9 +145,9 @@ def calcFieldLines(ti, lgbG, frac_Ax_lim, frac_Ay_lim, Nlines, lgfmax):
 
     return json.dumps({
         # 2D colormap
-        "X": (x1d/c).tolist(), "Y": (y1d/c).tolist(), "Z": np.nan_to_num(Eabs).tolist(),
+        "X": (x1d).tolist(), "Y": (y1d).tolist(), "Z": np.nan_to_num(Eabs).tolist(),
         # trajectory
-        "x_charge": [charge.xpos(ts[ti])/c], "y_charge": [charge.ypos(ts[ti])/c],
-        "x_traj": (charge.xpos(ts)/c).tolist(), "y_traj": (charge.ypos(ts)/c).tolist()
+        "x_charge": [charge.xpos(ts[ti])], "y_charge": [charge.ypos(ts[ti])],
+        "x_traj": (charge.xpos(ts)).tolist(), "y_traj": (charge.ypos(ts)).tolist()
         })
 

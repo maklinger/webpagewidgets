@@ -45,8 +45,15 @@ export class BaseColorPlotter {
 
     this.layout = {
       title: meta.title || "2D Color Plot",
-      xaxis: { title: meta.x_label || "X", zeroline: false, scaleanchor: "y", scaleratio: 1},
-      yaxis: { title: meta.y_label || "Y", zeroline: false },
+      xaxis: {
+        title: { text: meta.x_label || "X" },
+        scaleanchor: "y", scaleratio: 1,
+        zeroline: false,
+        },
+      yaxis: {
+        title: { text: meta.y_label || "Y" },
+        zeroline: false,
+      },
       autosize: true,
       width: meta.width || 600,
       height: meta.height || 500,
@@ -104,6 +111,15 @@ export class BaseColorPlotter {
       type: "heatmap",
       colorscale: this.colorscale,
       showscale: true,
+      colorbar: {
+        title: {
+        text: this.meta.cbar_label || "Intensity",
+        side: "right",
+        font: { size: 14 },
+        },
+        thickness: 20,
+        len: 0.7,
+      },
       zmin: -26,
       zmax: -22,
     };

@@ -346,14 +346,30 @@
 
   const charts = {};
   charts["plot_el"] = new ElPlotter.ElPlotter("plot_el", {
-    x_label: "lg E (eV)",
-    y_label: "E² dN/dEdt [au]",
-    title: "Electrons"
+    plotter_path : "../ElPlotter.js",
+    id : "plot_el",
+    type : "plot",
+    plotter : "../ElPlotter.js",
+    library : "chart.js",
+    title : "Electrons",
+    x_label : "lg E (eV)",
+    y_label : "E² dN/dEdt [au]",
+    width : "400",
+    height : "400",
+    varname : "ElPlotter",
   });
   charts["plot_ph"] = new PhPlotter.PhPlotter("plot_ph", {
-    x_label: "lg E (eV)",
-    y_label: "E² dN/dEdt [au]",
-    title: "Photons"
+    plotter_path : "../PhPlotter.js",
+    id : "plot_ph",
+    type : "plot",
+    plotter : "../PhPlotter.js",
+    library : "chart.js",
+    title : "Photons",
+    x_label : "lg E (eV)",
+    y_label : "E² dN/dEdt [au]",
+    width : "800",
+    height : "400",
+    varname : "PhPlotter",
   });
 
 

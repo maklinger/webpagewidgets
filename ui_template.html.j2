@@ -210,9 +210,9 @@
   const charts = {};
   {% for pid, meta in plots.items() %}
   charts["{{ pid }}"] = new {{ meta.varname }}.{{ meta.varname }}("{{ pid }}", {
-    x_label: "{{ meta.x_label }}",
-    y_label: "{{ meta.y_label }}",
-    title: "{{ meta.title }}"
+    {% for key, el in meta.items() %}
+    {{ key }} : "{{ el }}",
+    {% endfor %}
   });
   {% endfor %}
 

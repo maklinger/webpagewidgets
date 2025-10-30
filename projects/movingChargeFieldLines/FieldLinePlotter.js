@@ -17,5 +17,6 @@ export class FieldLinePlotter extends BaseColorPlotter {
     super.addOrUpdateLine("charge trajectory", result_dict.x_traj, result_dict.y_traj, {color: "grey", width: 3});
     super.addOrUpdateLine("charge position", result_dict.x_charge, result_dict.y_charge, {color: "#cec3c3f1", marker: ".", markersize: 6});
 
+
   }
 }

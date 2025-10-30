@@ -84,6 +84,7 @@ elements:
     title: Electric field amplitude
     x_label: "x [m]"
     y_label: "y [m]"
+    cbar_label: "Field strength [V/m]"
     width: 600
     height: 500
 
