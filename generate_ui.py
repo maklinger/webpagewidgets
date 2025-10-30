@@ -68,13 +68,16 @@ def build_elements(cfg):
             """
 
         elif el_type == "plot":
+            plot_el = "div"
+            if spec.get("library", "") == "chart.js":
+                plot_el = "canvas"
             elements[el_id] = f"""
               <div class="plot-container">
                 <div class="loading-spinner" id="{el_id}_spinner">
                     <div class="spinner"></div>
                 </div>
                 <h3>{spec.get("title", spec.get("label", el_id.title()))}</h3>
-                <canvas id="{el_id}" width="{spec.get('width', 0)}" height="{spec.get('height', 0)}"></canvas>
+                <{plot_el} id="{el_id}" width="{spec.get('width', 0)}" height="{spec.get('height', 0)}"></{plot_el}>
               </div>
             """
 

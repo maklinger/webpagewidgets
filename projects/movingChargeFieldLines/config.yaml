@@ -1,0 +1,96 @@
+project_name: Field Lines of an orbiting charge
+
+backend_files: # relative to output/ folder
+  - ../calcFieldLines.py  
+  - ../charges.py 
+  - ../field_calculations.py 
+
+python_packages:
+  - numpy
+  - scipy
+  - micropip
+
+js_packages:
+  - plotly
+
+functions:
+  calcFieldLines:
+    args: [ti, lgbG, frac_Ax_lim, frac_Ay_lim, Nlines, lgfmax]
+    trigger:
+      - control: "ti"
+        event: "input"
+      - control: "lgbG"
+        event: "input"
+      - control: "frac_Ax_lim"
+        event: "input"
+      - control: "frac_Ay_lim"
+        event: "input"
+      - control: "Nlines"
+        event: "input"
+      - control: "lgfmax"
+        event: "input"
+    updates: [plot_fields]
+
+
+elements:
+  - id: ti
+    type: slider
+    label: time slice index
+    min: 0
+    max: 99
+    step: 1
+    value: 0
+  - id: lgbG
+    type: slider
+    label: momentum (beta*Gamma)
+    min: -5
+    max: 5
+    step: 0.1
+    value: 0
+    scale: log10
+  - id: frac_Ax_lim
+    type: slider
+    label: asymmetry x
+    min: 0.01
+    max: 1
+    step: 0.01
+    value: 0.5
+  - id: frac_Ay_lim
+    type: slider
+    label: asymmetry y
+    min: 0.01
+    max: 1
+    step: 0.01
+    value: 0.5
+  - id: Nlines
+    type: slider
+    label: nr. of field lines
+    min: 1
+    max: 50
+    step: 1
+    value: 20
+  - id: lgfmax
+    type: slider
+    label: distance to calc. field lines
+    min: -5
+    max: 2
+    step: 0.1
+    value: 0
+    scale: log10
+  - id: plot_fields
+    type: plot
+    plotter: ../FieldLinePlotter.js
+    library: plotly.js
+    title: Electric field amplitude
+    x_label: "x [m]"
+    y_label: "y [m]"
+    width: 600
+    height: 600
+
+layout:
+  VerticalBox:
+    - HorizontalBox: [plot_fields]
+    - HorizontalBox: 
+      - VerticalBox: [lgbG, frac_Ax_lim, frac_Ay_lim]
+      - VerticalBox: [ti, Nlines, lgfmax]
+

@@ -36,6 +36,7 @@ elements:
   - id: traj_plot
     type: plot
     plotter: ../TrajPlotter.js
+    library: chart.js
     title: Trajectory
     x_label: "x (m)"
     y_label: "y (m)"

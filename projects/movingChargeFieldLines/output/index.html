@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Field Lines of an orbiting charge</title>
+  <style>
+    body { font-family: sans-serif; margin: 2em; }
+
+    .slider-container { margin-bottom: 1em; }
+
+    .vbox {
+      display: flex;
+      flex-direction: column;
+      gap: 1em;
+    }
+
+    .hbox {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 1em;
+    }
+    .back-link {
+        display: inline-block;
+        margin: 10px;
+        padding: 6px 10px;
+        background-color: #eee;
+        color: #333;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: background 0.2s;
+        }
+    .back-link:hover {
+        background-color: #ddd;
+    }
+
+    .loading-spinner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255,255,255,0.8);
+        z-index: 10;
+    }
+
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #24d70074;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .plot-container {
+        position: relative;
+        width: fit-content;
+    }
+
+
+    /* === Global Slider Styling === */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      background: #ffffffa9;        /* white track, no blue fill */
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+      background: #ffffffa9;
+      border-radius: 4px;
+    }
+
+    input[type="range"]::-moz-range-track {
+      background: #ffffffa9;
+      border-radius: 4px;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #1b690cf1;       /* teal color for all sliders */
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+      margin-top: -7px;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #1b690cf1;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+    }
+
+    input[type="range"]:hover::-webkit-slider-thumb {
+      background: #1b690cf1;
+    }
+
+    input[type="range"]:hover::-moz-range-thumb {
+      background: #1b690cf1;
+    }
+
+
+    canvas {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+    <a href="../../../index.html" class="back-link">← Back to overview</a>
+
+  <h1>Field Lines of an orbiting charge</h1>
+    <div id="main_ui">
+      <div class="vbox"><div class="hbox">
+              <div class="plot-container">
+                <div class="loading-spinner" id="plot_fields_spinner">
+                    <div class="spinner"></div>
+                </div>
+                <h3>Electric field amplitude</h3>
+                <div id="plot_fields" width="600" height="600"></div>
+              </div>
+            </div><div class="hbox"><div class="vbox">
+              <div class="slider-container">
+                <label for="lgbG">momentum (beta*Gamma): 
+                  <span id="lgbG_val">1e0</span>
+                </label><br>
+                <input type="range" id="lgbG"
+                       min="-5"
+                       max="5"
+                       step="0.1"
+                       value="0"
+                       oninput="document.getElementById('lgbG_val').innerText = '1e' + this.value">
+              </div>
+            
+              <div class="slider-container">
+                <label for="frac_Ax_lim">asymmetry x: 
+                  <span id="frac_Ax_lim_val">0.5</span>
+                </label><br>
+                <input type="range" id="frac_Ax_lim"
+                       min="0.01"
+                       max="1"
+                       step="0.01"
+                       value="0.5"
+                       oninput="document.getElementById('frac_Ax_lim_val').innerText = '' + this.value">
+              </div>
+            
+              <div class="slider-container">
+                <label for="frac_Ay_lim">asymmetry y: 
+                  <span id="frac_Ay_lim_val">0.5</span>
+                </label><br>
+                <input type="range" id="frac_Ay_lim"
+                       min="0.01"
+                       max="1"
+                       step="0.01"
+                       value="0.5"
+                       oninput="document.getElementById('frac_Ay_lim_val').innerText = '' + this.value">
+              </div>
+            </div><div class="vbox">
+              <div class="slider-container">
+                <label for="ti">time slice index: 
+                  <span id="ti_val">0</span>
+                </label><br>
+                <input type="range" id="ti"
+                       min="0"
+                       max="99"
+                       step="1"
+                       value="0"
+                       oninput="document.getElementById('ti_val').innerText = '' + this.value">
+              </div>
+            
+              <div class="slider-container">
+                <label for="Nlines">nr. of field lines: 
+                  <span id="Nlines_val">20</span>
+                </label><br>
+                <input type="range" id="Nlines"
+                       min="1"
+                       max="50"
+                       step="1"
+                       value="20"
+                       oninput="document.getElementById('Nlines_val').innerText = '' + this.value">
+              </div>
+            
+              <div class="slider-container">
+                <label for="lgfmax">distance to calc. field lines: 
+                  <span id="lgfmax_val">1e0</span>
+                </label><br>
+                <input type="range" id="lgfmax"
+                       min="-5"
+                       max="2"
+                       step="0.1"
+                       value="0"
+                       oninput="document.getElementById('lgfmax_val').innerText = '1e' + this.value">
+              </div>
+            </div></div></div>
+    </div>
+
+  <script src="https://cdn.plot.ly/plotly-3.1.0.min.js" charset="utf-8"></script>
+
+  <script type="module">
+  
+
+  function showSpinner(id) {
+    const spinner = document.getElementById(id + "_spinner");
+    if (spinner) spinner.style.display = "flex";
+  }
+
+  function hideSpinner(id) {
+    const spinner = document.getElementById(id + "_spinner");
+    if (spinner) spinner.style.display = "none";
+  }
+  showSpinner("plot_fields");
+
+  import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.mjs";
+  const pyodide = await loadPyodide();
+  console.log("✅ Pyodide loaded");
+  // Redirect Python print to JS console
+  pyodide.setStdout({
+    batched: (s) => console.log(s)
+  });
+  pyodide.setStderr({
+    batched: (s) => console.error(s)
+  });
+
+
+  // Load required Python packages from YAML
+  const pkgs = ["numpy", "scipy", "micropip"];
+  for (const pkg of pkgs) {
+    console.log(`📦 Loading ${pkg} ...`);
+    try {
+      await pyodide.loadPackage(pkg);
+    } catch (err) {
+      console.warn(`⚠️ Could not load ${pkg} automatically, trying micropip`);
+      const micropip = pyodide.pyimport("micropip");
+      await micropip.install(pkg);
+    }
+  }
+
+  // Import the plotters
+  console.log("Import plotter");
+  const FieldLinePlotter = await import("../FieldLinePlotter.js");
+
+  // Load Python files relative to index.html
+  console.log("Load python files");
+  const src_1 = await (await fetch("../calcFieldLines.py")).text();
+  pyodide.runPython(src_1);
+  const src_2 = await (await fetch("../charges.py")).text();
+  pyodide.runPython(src_2);
+  const src_3 = await (await fetch("../field_calculations.py")).text();
+  pyodide.runPython(src_3);
+
+  hideSpinner("plot_fields");
+
+  // define the function - argument mapping
+  console.log("Define functions");
+  const functions = {"calcFieldLines": {"args": ["ti", "lgbG", "frac_Ax_lim", "frac_Ay_lim", "Nlines", "lgfmax"], "trigger": [{"control": "ti", "event": "input"}, {"control": "lgbG", "event": "input"}, {"control": "frac_Ax_lim", "event": "input"}, {"control": "frac_Ay_lim", "event": "input"}, {"control": "Nlines", "event": "input"}, {"control": "lgfmax", "event": "input"}], "updates": ["plot_fields"]}};
+
+
+  const charts = {};
+  charts["plot_fields"] = new FieldLinePlotter.FieldLinePlotter("plot_fields", {
+    x_label: "x [m]",
+    y_label: "y [m]",
+    title: "Electric field amplitude"
+  });
+
+
+  async function runFunction(funcName) {
+    console.log("Running" + funcName);
+    const meta = functions[funcName];
+    const args = meta.args.map(id => {
+        const el = document.getElementById(id);
+        const val = parseFloat(el.value);
+        return `${id}=${val}`;
+    });
+    const pyCall = `${funcName}(${args.join(", ")})`;
+    const jsonResult = await pyodide.runPythonAsync(pyCall);
+    const result = JSON.parse(jsonResult);
+    
+    
+    if (meta.updates && Array.isArray(meta.updates)) {
+      for (const pid of meta.updates) {
+        const chart = charts[pid];
+        if (chart && typeof chart.render === "function") {
+            //console.log(`Updating plot: ${pid}`);
+            chart.render(result);
+        } //else {
+        //    console.warn(`No renderable chart found for '${pid}'`);
+        //}
+      }
+    }
+
+  }
+
+
+  document.getElementById('ti')
+          .addEventListener('input', () => runFunction('calcFieldLines'));
+  document.getElementById('lgbG')
+          .addEventListener('input', () => runFunction('calcFieldLines'));
+  document.getElementById('frac_Ax_lim')
+          .addEventListener('input', () => runFunction('calcFieldLines'));
+  document.getElementById('frac_Ay_lim')
+          .addEventListener('input', () => runFunction('calcFieldLines'));
+  document.getElementById('Nlines')
+          .addEventListener('input', () => runFunction('calcFieldLines'));
+  document.getElementById('lgfmax')
+          .addEventListener('input', () => runFunction('calcFieldLines'));
+  runFunction('calcFieldLines');
+
+  
+
+  </script>
+
+</body>
+</html>
