@@ -49,7 +49,7 @@ export class BaseColorPlotter {
       yaxis: { title: meta.y_label || "Y", zeroline: false },
       autosize: true,
       width: meta.width || 600,
-      height: meta.height || 600,
+      height: meta.height || 500,
       margin: { l: 50, r: 50, t: 50, b: 50 },
       coloraxis: { colorscale},
     };
