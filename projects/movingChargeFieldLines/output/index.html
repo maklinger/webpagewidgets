@@ -142,7 +142,7 @@
               </div>
             </div><div class="hbox"><div class="vbox">
               <div class="slider-container">
-                <label for="lgbG">momentum (beta*Gamma): 
+                <label for="lgbG">momentum (\(\beta\Gamma\)): 
                   <span id="lgbG_val">1e0</span>
                 </label><br>
                 <input type="range" id="lgbG"
@@ -176,7 +176,7 @@
                        value="0.5"
                        oninput="document.getElementById('frac_Ay_lim_val').innerText = '' + this.value">
               </div>
-            </div><div class="vbox">
+            
               <div class="slider-container">
                 <label for="ti">time slice index: 
                   <span id="ti_val">0</span>
@@ -187,6 +187,18 @@
                        step="1"
                        value="0"
                        oninput="document.getElementById('ti_val').innerText = '' + this.value">
+              </div>
+            </div><div class="vbox">
+              <div class="slider-container">
+                <label for="resolution">grid resolution: 
+                  <span id="resolution_val">101</span>
+                </label><br>
+                <input type="range" id="resolution"
+                       min="11"
+                       max="201"
+                       step="2"
+                       value="101"
+                       oninput="document.getElementById('resolution_val').innerText = '' + this.value">
               </div>
             
               <div class="slider-container">
@@ -214,6 +226,10 @@
               </div>
             </div></div></div>
     </div>
+
+  <!-- for latex-style math via mathjax --!>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
 
   <script src="https://cdn.plot.ly/plotly-3.1.0.min.js" charset="utf-8"></script>
 
@@ -273,7 +289,7 @@
 
   // define the function - argument mapping
   console.log("Define functions");
-  const functions = {"calcFieldLines": {"args": ["ti", "lgbG", "frac_Ax_lim", "frac_Ay_lim", "Nlines", "lgfmax"], "trigger": [{"control": "ti", "event": "input"}, {"control": "lgbG", "event": "input"}, {"control": "frac_Ax_lim", "event": "input"}, {"control": "frac_Ay_lim", "event": "input"}, {"control": "Nlines", "event": "input"}, {"control": "lgfmax", "event": "input"}], "updates": ["plot_fields"]}};
+  const functions = {"calcFieldLines": {"args": ["ti", "lgbG", "frac_Ax_lim", "frac_Ay_lim", "resolution", "Nlines", "lgfmax"], "trigger": [{"control": "ti", "event": "input"}, {"control": "lgbG", "event": "input"}, {"control": "frac_Ax_lim", "event": "input"}, {"control": "frac_Ay_lim", "event": "input"}, {"control": "resolution", "event": "input"}, {"control": "Nlines", "event": "input"}, {"control": "lgfmax", "event": "input"}], "updates": ["plot_fields"]}};
 
 
   const charts = {};
@@ -328,6 +344,8 @@
   document.getElementById('frac_Ax_lim')
           .addEventListener('input', () => runFunction('calcFieldLines'));
   document.getElementById('frac_Ay_lim')
+          .addEventListener('input', () => runFunction('calcFieldLines'));
+  document.getElementById('resolution')
           .addEventListener('input', () => runFunction('calcFieldLines'));
   document.getElementById('Nlines')
           .addEventListener('input', () => runFunction('calcFieldLines'));

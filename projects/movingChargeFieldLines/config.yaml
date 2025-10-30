@@ -15,7 +15,7 @@ js_packages:
 
 functions:
   calcFieldLines:
-    args: [ti, lgbG, frac_Ax_lim, frac_Ay_lim, Nlines, lgfmax]
+    args: [ti, lgbG, frac_Ax_lim, frac_Ay_lim, resolution, Nlines, lgfmax]
     trigger:
       - control: "ti"
         event: "input"
@@ -24,6 +24,8 @@ functions:
       - control: "frac_Ax_lim"
         event: "input"
       - control: "frac_Ay_lim"
+        event: "input"
+      - control: "resolution"
         event: "input"
       - control: "Nlines"
         event: "input"
@@ -42,7 +44,7 @@ elements:
     value: 0
   - id: lgbG
     type: slider
-    label: momentum (beta*Gamma)
+    label: momentum (\(\beta\Gamma\))
     min: -5
     max: 5
     step: 0.1
@@ -62,6 +64,13 @@ elements:
     max: 1
     step: 0.01
     value: 0.5
+  - id: resolution
+    type: slider
+    label: grid resolution
+    min: 11
+    max: 201
+    step: 2
+    value: 101
   - id: Nlines
     type: slider
     label: nr. of field lines
@@ -92,6 +101,6 @@ layout:
   VerticalBox:
     - HorizontalBox: [plot_fields]
     - HorizontalBox: 
-      - VerticalBox: [lgbG, frac_Ax_lim, frac_Ay_lim]
-      - VerticalBox: [ti, Nlines, lgfmax]
+      - VerticalBox: [lgbG, frac_Ax_lim, frac_Ay_lim, ti]
+      - VerticalBox: [resolution, Nlines, lgfmax]
 

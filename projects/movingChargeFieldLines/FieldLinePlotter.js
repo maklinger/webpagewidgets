@@ -17,6 +17,20 @@ export class FieldLinePlotter extends BaseColorPlotter {
     super.addOrUpdateLine("charge trajectory", result_dict.x_traj, result_dict.y_traj, {color: "grey", width: 3});
     super.addOrUpdateLine("charge position", result_dict.x_charge, result_dict.y_charge, {color: "#cec3c3f1", marker: ".", markersize: 6});
 
+    // 50 = Nlines in config
+    for (let i = 0; i < 50; i++) {
+        console.log(i);
+      if (i<result_dict.x_field_lines.length) {
+        super.addOrUpdateLine("field_line_" + i, 
+            result_dict.x_field_lines[i], result_dict.y_field_lines[i], 
+            {color: "#000000", width: 1, alpha: 0.4, showlegend: false});
+      } else {
+        super.removeLine("field_line_" + i);
+      }
 
+        
+    }
+    super.set_axis_limits(result_dict.X.at(0), result_dict.X.at(-1),
+        result_dict.Y.at(0), result_dict.Y.at(-1));
   }
 }

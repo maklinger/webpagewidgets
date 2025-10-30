@@ -135,6 +135,10 @@
       {{ layout_html | safe }}
     </div>
 
+  <!-- for latex-style math via mathjax --!>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+
   {% for lib in js_packages %}
     {% if lib == "plotly" %}
   <script src="https://cdn.plot.ly/plotly-3.1.0.min.js" charset="utf-8"></script>

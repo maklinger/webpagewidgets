@@ -115,14 +115,14 @@ class Oscillator(Charge):
         return 2*np.pi/self.w
     
 
-def calcFieldLines(ti, lgbG, frac_Ax_lim, frac_Ay_lim, Nlines, lgfmax):
+def calcFieldLines(ti, lgbG, frac_Ax_lim, frac_Ay_lim, resolution, Nlines, lgfmax):
 
     bG = 10**lgbG
     fmax = 10**lgfmax
 
     Nts = 100
     lim = 1e8  # m
-    grid_size = 201  # number of points along x and z direction
+    grid_size = resolution  # number of points along x and y direction
     x1d = np.linspace(-lim, lim, grid_size)
     y1d = np.linspace(-lim, lim, grid_size)
     X, Y, Z = np.meshgrid(x1d, y1d, 0, indexing='ij')
@@ -133,14 +133,15 @@ def calcFieldLines(ti, lgbG, frac_Ax_lim, frac_Ay_lim, Nlines, lgfmax):
     field = MovingChargesField(charge, h=1e-4)
 
     ts = np.linspace(0, 2*np.pi/charge.w, Nts)
-    # ts = np.arange(0, Nts*dt, dt) # s
     t = ts[ti]
     
     E_total = field.calculate_E(t=t, X=X, Y=Y, Z=Z, pcharge_field='Total', plane=True)
     Eabs = (E_total[0].T**2 + E_total[1].T**2)**0.5
 
-    # print(x1d)
-    # print(Eabs.tolist())
+    us, vs, alphas, sol = field.calculate_FieldLines_Tsien(ts[ti], fmax*lim, Nlines=Nlines, Nintsteps=1000)
+    x_field_lines = charge.xpos(t-sol.t[:, None]/c) + sol.t[:, None] * np.cos(charge.xytheta(t-sol.t[:, None]/c) + sol.y.T)
+    y_field_lines = charge.ypos(t-sol.t[:, None]/c) + sol.t[:, None] * np.sin(charge.xytheta(t-sol.t[:, None]/c) + sol.y.T)
+
 
 
     return json.dumps({
@@ -148,6 +149,8 @@ def calcFieldLines(ti, lgbG, frac_Ax_lim, frac_Ay_lim, Nlines, lgfmax):
         "X": (x1d).tolist(), "Y": (y1d).tolist(), "Z": np.nan_to_num(Eabs).tolist(),
         # trajectory
         "x_charge": [charge.xpos(ts[ti])], "y_charge": [charge.ypos(ts[ti])],
-        "x_traj": (charge.xpos(ts)).tolist(), "y_traj": (charge.ypos(ts)).tolist()
+        "x_traj": (charge.xpos(ts)).tolist(), "y_traj": (charge.ypos(ts)).tolist(),
+        "x_field_lines": x_field_lines.T.tolist(),
+        "y_field_lines": y_field_lines.T.tolist()
         })
 

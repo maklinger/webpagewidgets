@@ -163,6 +163,11 @@ export class BaseColorPlotter {
     ".": "circle",
   };
 
+
+  const color = options.color || options.c || "black";
+  const alpha = options.alpha != null ? options.alpha : 1.0;
+  const rgbaColor = this._applyAlpha(color, alpha);
+
   const trace = {
     x,
     y,
@@ -170,14 +175,14 @@ export class BaseColorPlotter {
     type: "scatter",
     name: name || `line_${Object.keys(this.lineMap).length}`,
     line: {
-      color: options.color || "#FF5733",
+      color: rgbaColor,
       width: options.linewidth || 2,
       dash: options.linestyle || "solid",
     },
     marker: {
       symbol: markerStyleMap[options.marker || options.markerstyle] || "circle",
       size: options.markersize || 6,
-      color: options.markercolor || options.color || "#FF5733",
+      color: options.markercolor || rgbaColor,
       opacity: options.alpha ?? 1.0,
       line: {
         width: options.markeredgewidth || 1,
@@ -240,4 +245,28 @@ export class BaseColorPlotter {
     Plotly.purge(this.containerId);
     this.initialized = false;
   }
+
+  set_axis_limits(xmin, xmax, ymin, ymax) {
+    const update = {};
+    if (xmin !== undefined && xmax !== undefined)
+        update["xaxis.range"] = [xmin, xmax];
+    if (ymin !== undefined && ymax !== undefined)
+        update["yaxis.range"] = [ymin, ymax];
+    Plotly.relayout(this.containerId, update);
+  }
+
+  /** Simple alpha compositing for rgba colors */
+  _applyAlpha(color, alpha) {
+    // Handle hex codes
+    if (color.startsWith("#")) {
+      const r = parseInt(color.slice(1, 3), 16);
+      const g = parseInt(color.slice(3, 5), 16);
+      const b = parseInt(color.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+    // Assume already rgba or named color
+    return color;
+  }
+
+
 }
