@@ -5,3 +5,8 @@ projects:
     path: "projects/SynchrotronConvolution/output/index.html"
     image: "projects/SynchrotronConvolution/preview.png"
     description: "Visualise the relation between electron spectra and the corresponding synchrotron spectra."
+
+  - name: "Orbiting Charge"
+    path: "projects/movingChargeFieldLines/output/index.html"
+    image: "projects/movingChargeFieldLines/preview.png"
+    description: "Visualise the electric fields of a moving charge."
