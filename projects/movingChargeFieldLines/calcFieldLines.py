@@ -138,10 +138,13 @@ def calcFieldLines(ti, lgbG, frac_Ax_lim, frac_Ay_lim, resolution, Nlines, lgfma
     E_total = field.calculate_E(t=t, X=X, Y=Y, Z=Z, pcharge_field='Total', plane=True)
     Eabs = (E_total[0].T**2 + E_total[1].T**2)**0.5
 
-    us, vs, alphas, sol = field.calculate_FieldLines_Tsien(ts[ti], fmax*lim, Nlines=Nlines, Nintsteps=1000)
-    x_field_lines = charge.xpos(t-sol.t[:, None]/c) + sol.t[:, None] * np.cos(charge.xytheta(t-sol.t[:, None]/c) + sol.y.T)
-    y_field_lines = charge.ypos(t-sol.t[:, None]/c) + sol.t[:, None] * np.sin(charge.xytheta(t-sol.t[:, None]/c) + sol.y.T)
-
+    if Nlines > 0:
+        us, vs, alphas, sol = field.calculate_FieldLines_Tsien(ts[ti], fmax*lim, Nlines=Nlines, Nintsteps=1000)
+        x_field_lines = charge.xpos(t-sol.t[:, None]/c) + sol.t[:, None] * np.cos(charge.xytheta(t-sol.t[:, None]/c) + sol.y.T)
+        y_field_lines = charge.ypos(t-sol.t[:, None]/c) + sol.t[:, None] * np.sin(charge.xytheta(t-sol.t[:, None]/c) + sol.y.T)
+    else:
+        x_field_lines = np.array([])
+        y_field_lines = np.array([])
 
 
     return json.dumps({
